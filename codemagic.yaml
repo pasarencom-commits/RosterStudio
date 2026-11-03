@@ -3,14 +3,16 @@ workflows:
     name: Roster Studio iOS
     instance_type: mac_mini_m2
     max_build_duration: 60
+    integrations:
+      app_store_connect: app_store_credentials
     environment:
       xcode: latest
-      ios_signing:
-        distribution_type: app_store
-        bundle_identifier: com.shiftlattice.rosterstudio
+      groups:
+        - code_signing
       vars:
         XCODE_PROJECT: RosterStudio.xcodeproj
         XCODE_SCHEME: RosterStudio
+        BUNDLE_ID: com.shiftlattice.rosterstudio
     triggering:
       events:
         - push
@@ -19,21 +21,22 @@ workflows:
           include: true
           source: true
     scripts:
-      - name: Set up code signing
+      - name: Initialize keychain
+        script: keychain initialize
+      - name: Fetch signing files from Apple
+        script: app-store-connect fetch-signing-files "$BUNDLE_ID" --type IOS_APP_STORE --create
+      - name: Add certificates to keychain
+        script: keychain add-certificates
+      - name: Set up code signing settings on Xcode project
         script: xcode-project use-profiles
       - name: Build IPA
-        script: |
-          xcode-project build-ipa \
-            --project "$CM_BUILD_DIR/$XCODE_PROJECT" \
-            --scheme "$XCODE_SCHEME"
+        script: xcode-project build-ipa --project "$CM_BUILD_DIR/$XCODE_PROJECT" --scheme "$XCODE_SCHEME"
     artifacts:
       - build/ios/ipa/*.ipa
       - /tmp/xcodebuild_logs/*.log
     publishing:
       app_store_connect:
-        api_key: app_store_credentials
-        key_id: 9Z25W76287
-        issuer_id: 715bc579-e12e-41fc-974b-e83e677b1386
+        auth: integration
         submit_to_testflight: true
 
   # Verifies that the Swift sources compile, without any signing material.
@@ -50,12 +53,4 @@ workflows:
     scripts:
       - name: Build for iOS Simulator
         script: |
-          xcodebuild \
-            -project "$CM_BUILD_DIR/$XCODE_PROJECT" \
-            -scheme "$XCODE_SCHEME" \
-            -configuration Debug \
-            -sdk iphonesimulator \
-            -destination 'generic/platform=iOS Simulator' \
-            -derivedDataPath "$CM_BUILD_DIR/build" \
-            CODE_SIGNING_ALLOWED=NO \
-            build
+          xcodebuild             -project "$CM_BUILD_DIR/$XCODE_PROJECT"             -scheme "$XCODE_SCHEME"             -configuration Debug             -sdk iphonesimulator             -destination 'generic/platform=iOS Simulator'             -derivedDataPath "$CM_BUILD_DIR/build"             CODE_SIGNING_ALLOWED=NO             build
