@@ -29,10 +29,12 @@ workflows:
     artifacts:
       - build/ios/ipa/*.ipa
       - /tmp/xcodebuild_logs/*.log
-    publishing:
-      # Create an App Store Connect integration named exactly
-      # "app_store_credentials" in Codemagic (Team settings > Integrations),
-      # then this step uploads the build to TestFlight automatically.
-      app_store_connect:
-        api_key: app_store_credentials
-        submit_to_testflight: true
+    # Uncomment after creating the App Store Connect integration named
+    # "app_store_credentials" (Team settings > Integrations) and filling in
+    # your Key ID and Issuer ID.
+    # publishing:
+    #   app_store_connect:
+    #     api_key: app_store_credentials
+    #     key_id: YOUR_KEY_ID
+    #     issuer_id: YOUR_ISSUER_ID
+    #     submit_to_testflight: true
