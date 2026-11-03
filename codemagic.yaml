@@ -7,8 +7,6 @@ workflows:
       app_store_connect: app_store_credentials
     environment:
       xcode: latest
-      groups:
-        - code_signing
       vars:
         XCODE_PROJECT: RosterStudio.xcodeproj
         XCODE_SCHEME: RosterStudio
