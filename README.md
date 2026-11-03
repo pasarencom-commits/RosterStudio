@@ -45,6 +45,8 @@ open RosterStudio.xcodeproj
 
 ## 提交 App Store
 
+> Windows 用户：不用 Mac 也能提审，完整步骤见 [docs/STORE_RELEASE.md](docs/STORE_RELEASE.md)（GitHub + Codemagic + TestFlight + 网页提交）。
+
 1. 在 [App Store Connect](https://appstoreconnect.apple.com) 新建 App，Bundle ID 与工程一致。
 2. Xcode 菜单 `Product → Destination → Any iOS Device (arm64)`。
 3. `Product → Archive`，归档完成后在 Organizer 中点 `Distribute App → App Store Connect → Upload`。
@@ -90,6 +92,8 @@ RosterStudio/
 │   ├── Assets.xcassets/             # AppIcon 与 AccentColor
 │   └── PrivacyInfo.xcprivacy
 ├── codemagic.yaml
+├── docs/STORE_RELEASE.md            # 无 Mac 提审全流程
+├── PRIVACY.md                       # 隐私政策（可发布到 GitHub Pages）
 └── README.md
 ```
 

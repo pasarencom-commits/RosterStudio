@@ -29,12 +29,10 @@ workflows:
     artifacts:
       - build/ios/ipa/*.ipa
       - /tmp/xcodebuild_logs/*.log
-    # Configure an App Store Connect integration in Codemagic, then enable
-    # publishing from the UI. Notifications below are optional.
-    # publishing:
-    #   email:
-    #     recipients:
-    #       - you@example.com
-    #     notify:
-    #       success: true
-    #       failure: true
+    publishing:
+      # Create an App Store Connect integration named exactly
+      # "app_store_credentials" in Codemagic (Team settings > Integrations),
+      # then this step uploads the build to TestFlight automatically.
+      app_store_connect:
+        api_key: app_store_credentials
+        submit_to_testflight: true
