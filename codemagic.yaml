@@ -38,3 +38,27 @@ workflows:
     #     key_id: YOUR_KEY_ID
     #     issuer_id: YOUR_ISSUER_ID
     #     submit_to_testflight: true
+
+  # Verifies that the Swift sources compile, without any signing material.
+  # Needs no Apple account: pick this workflow when testing code changes.
+  compile-check:
+    name: Compile Check (no signing)
+    instance_type: mac_mini_m2
+    max_build_duration: 30
+    environment:
+      xcode: latest
+      vars:
+        XCODE_PROJECT: RosterStudio.xcodeproj
+        XCODE_SCHEME: RosterStudio
+    scripts:
+      - name: Build for iOS Simulator
+        script: |
+          xcodebuild \
+            -project "$CM_BUILD_DIR/$XCODE_PROJECT" \
+            -scheme "$XCODE_SCHEME" \
+            -configuration Debug \
+            -sdk iphonesimulator \
+            -destination 'generic/platform=iOS Simulator' \
+            -derivedDataPath "$CM_BUILD_DIR/build" \
+            CODE_SIGNING_ALLOWED=NO \
+            build
