@@ -29,15 +29,12 @@ workflows:
     artifacts:
       - build/ios/ipa/*.ipa
       - /tmp/xcodebuild_logs/*.log
-    # Uncomment after creating the App Store Connect integration named
-    # "app_store_credentials" (Team settings > Integrations) and filling in
-    # your Key ID and Issuer ID.
-    # publishing:
-    #   app_store_connect:
-    #     api_key: app_store_credentials
-    #     key_id: YOUR_KEY_ID
-    #     issuer_id: YOUR_ISSUER_ID
-    #     submit_to_testflight: true
+    publishing:
+      app_store_connect:
+        api_key: app_store_credentials
+        key_id: 9Z25W76287
+        issuer_id: 715bc579-e12e-41fc-974b-e83e677b1386
+        submit_to_testflight: true
 
   # Verifies that the Swift sources compile, without any signing material.
   # Needs no Apple account: pick this workflow when testing code changes.
