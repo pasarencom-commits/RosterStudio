@@ -1,3 +1,6 @@
+yaml
+
+
 workflows:
   roster-studio-ios:
     name: Roster Studio iOS
@@ -39,8 +42,6 @@ workflows:
         auth: integration
         submit_to_testflight: false
 
-  # Verifies that the Swift sources compile, without any signing material.
-  # Needs no Apple account: pick this workflow when testing code changes.
   compile-check:
     name: Compile Check (no signing)
     instance_type: mac_mini_m2
@@ -53,4 +54,44 @@ workflows:
     scripts:
       - name: Build for iOS Simulator
         script: |
-          xcodebuild             -project "$CM_BUILD_DIR/$XCODE_PROJECT"             -scheme "$XCODE_SCHEME"             -configuration Debug             -sdk iphonesimulator             -destination 'generic/platform=iOS Simulator'             -derivedDataPath "$CM_BUILD_DIR/build"             CODE_SIGNING_ALLOWED=NO             build
+          xcodebuild \
+            -project "$CM_BUILD_DIR/$XCODE_PROJECT" \
+            -scheme "$XCODE_SCHEME" \
+            -configuration Debug \
+            -sdk iphonesimulator \
+            -destination 'generic/platform=iOS Simulator' \
+            -derivedDataPath "$CM_BUILD_DIR/build" \
+            CODE_SIGNING_ALLOWED=NO \
+            build
+
+  roster-studio-adhoc:
+    name: Roster Studio Ad Hoc
+    instance_type: mac_mini_m2
+    max_build_duration: 60
+    integrations:
+      app_store_connect: app_store_credentials
+    environment:
+      xcode: latest
+      ios_signing:
+        distribution_type: ad_hoc
+        bundle_identifier: com.shiftlattice.rosterstudio
+      vars:
+        XCODE_PROJECT: RosterStudio.xcodeproj
+        XCODE_SCHEME: RosterStudio
+        BUNDLE_ID: com.shiftlattice.rosterstudio
+    triggering:
+      events:
+        - push
+      branch_patterns:
+        - pattern: main
+          include: true
+          source: true
+    scripts:
+      - name: Fetch Ad Hoc signing files from Apple
+        script: app-store-connect fetch-signing-files "$BUNDLE_ID" --type IOS_APP_ADHOC --create
+      - name: Set up code signing settings on Xcode project
+        script: xcode-project use-profiles
+      - name: Build Ad Hoc IPA
+        script: xcode-project build-ipa --project "$XCODE_PROJECT" --scheme "$XCODE_SCHEME"
+    artifacts:
+      - build/ios/ipa/*.ipa
