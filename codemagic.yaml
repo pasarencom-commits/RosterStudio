@@ -1,69 +1,4 @@
-yaml
-
-
 workflows:
-  roster-studio-ios:
-    name: Roster Studio iOS
-    instance_type: mac_mini_m2
-    max_build_duration: 60
-    integrations:
-      app_store_connect: app_store_credentials
-    environment:
-      xcode: latest
-      groups:
-        - code_signing
-      vars:
-        XCODE_PROJECT: RosterStudio.xcodeproj
-        XCODE_SCHEME: RosterStudio
-        BUNDLE_ID: com.shiftlattice.rosterstudio
-    triggering:
-      events:
-        - push
-      branch_patterns:
-        - pattern: main
-          include: true
-          source: true
-    scripts:
-      - name: Initialize keychain
-        script: keychain initialize
-      - name: Fetch signing files from Apple
-        script: app-store-connect fetch-signing-files "$BUNDLE_ID" --type IOS_APP_STORE --create
-      - name: Add certificates to keychain
-        script: keychain add-certificates
-      - name: Set up code signing settings on Xcode project
-        script: xcode-project use-profiles
-      - name: Build IPA
-        script: xcode-project build-ipa --project "$CM_BUILD_DIR/$XCODE_PROJECT" --scheme "$XCODE_SCHEME"
-    artifacts:
-      - build/ios/ipa/*.ipa
-      - /tmp/xcodebuild_logs/*.log
-    publishing:
-      app_store_connect:
-        auth: integration
-        submit_to_testflight: false
-
-  compile-check:
-    name: Compile Check (no signing)
-    instance_type: mac_mini_m2
-    max_build_duration: 30
-    environment:
-      xcode: latest
-      vars:
-        XCODE_PROJECT: RosterStudio.xcodeproj
-        XCODE_SCHEME: RosterStudio
-    scripts:
-      - name: Build for iOS Simulator
-        script: |
-          xcodebuild \
-            -project "$CM_BUILD_DIR/$XCODE_PROJECT" \
-            -scheme "$XCODE_SCHEME" \
-            -configuration Debug \
-            -sdk iphonesimulator \
-            -destination 'generic/platform=iOS Simulator' \
-            -derivedDataPath "$CM_BUILD_DIR/build" \
-            CODE_SIGNING_ALLOWED=NO \
-            build
-
   roster-studio-adhoc:
     name: Roster Studio Ad Hoc
     instance_type: mac_mini_m2
@@ -79,13 +14,6 @@ workflows:
         XCODE_PROJECT: RosterStudio.xcodeproj
         XCODE_SCHEME: RosterStudio
         BUNDLE_ID: com.shiftlattice.rosterstudio
-    triggering:
-      events:
-        - push
-      branch_patterns:
-        - pattern: main
-          include: true
-          source: true
     scripts:
       - name: Fetch Ad Hoc signing files from Apple
         script: app-store-connect fetch-signing-files "$BUNDLE_ID" --type IOS_APP_ADHOC --create
